@@ -7,7 +7,6 @@
     "@types/websocket": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "2.16.0",
     "@typescript-eslint/parser": "2.16.0",
-    "corekey": "^1.0.0-beta.6",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.9.0",
     "eslint-plugin-prettier": "3.1.2",
@@ -18,7 +17,7 @@
   "dependencies": {
     "@types/dotenv": "^8.2.0",
     "@types/node-fetch": "^2.5.0",
-    "dotenv": "^8.1.0",
+    "dotenv": "^8.2.0",
     "moment": "^2.24.0",
     "node-fetch": "^2.6.0",
     "websocket": "^1.0.30"
