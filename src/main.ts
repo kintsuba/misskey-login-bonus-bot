@@ -46,8 +46,9 @@ client.on("connect", connection => {
     if (data.body.id === "formain" && data.body.type === "followed") {
       misskeyUtils.follow(data.body.body.id);
     } else if (data.body.id === "forhybridtl" && data.body.type == "note") {
+      console.debug(data);
       if (/ログインボーナス/.test(data.body.body.text)) {
-        bonus.update(message);
+        bonus.update(data.body.body.id, data.body.body.userId);
       }
     }
   });
