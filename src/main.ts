@@ -9,6 +9,8 @@ if (!process.env.MISSKEY_TOKEN) {
 }
 
 const token = process.env.MISSKEY_TOKEN;
+const instance = "misskey.m544.net";
+
 const bonus = new Bonus();
 
 const client = new WebSocket.client();
@@ -54,4 +56,4 @@ client.on("connect", connection => {
   connection.sendUTF(MisskeyUtils.connectHybridTLJson);
 });
 
-client.connect("wss://misskey.m544.net/streaming?i=" + token);
+client.connect("wss://" + instance + "/streaming?i=" + token);
