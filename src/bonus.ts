@@ -1,7 +1,9 @@
+import * as WebSocket from "websocket";
+
 export default class Bonus {
   // constructor() {}
 
-  update(): void {
-    console.log("update");
+  update(message: WebSocket.IMessage): void {
+    console.log(message);
   }
 }

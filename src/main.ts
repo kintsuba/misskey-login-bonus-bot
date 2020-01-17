@@ -47,7 +47,7 @@ client.on("connect", connection => {
       misskeyUtils.follow(data.body.body.id);
     } else if (data.body.id === "forhybridtl" && data.body.type == "note") {
       if (/ログインボーナス/.test(data.body.body.text)) {
-        bonus.update();
+        bonus.update(message);
       }
     }
   });
