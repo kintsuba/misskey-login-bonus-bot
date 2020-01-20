@@ -4,6 +4,7 @@ import schedule from "node-schedule";
 import moment from "moment";
 import "moment/locale/ja";
 import MisskeyUtils from "./misskey-utils";
+import Bonus from "./bonus";
 
 const removeNotFollowed = async (
   misskeyUtils: MisskeyUtils
@@ -39,7 +40,7 @@ const removeNotFollowed = async (
   return false;
 };
 
-const periodicallyJobs = (misskeyUtils: MisskeyUtils): void => {
+const periodicallyJobs = (misskeyUtils: MisskeyUtils, bonus: Bonus): void => {
   const fiveOclockJob = schedule.scheduleJob("00 05 * * *", () => {
     // firebase uncheck isGetBonus
     removeNotFollowed(misskeyUtils);

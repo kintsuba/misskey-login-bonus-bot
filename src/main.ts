@@ -34,7 +34,7 @@ client.on("connect", connection => {
 
   const misskeyUtils = new MisskeyUtils(token, connection);
   if (!isRunOnceFunction) {
-    periodicallyJobs(misskeyUtils);
+    periodicallyJobs(misskeyUtils, bonus);
     isRunOnceFunction = true;
   }
 

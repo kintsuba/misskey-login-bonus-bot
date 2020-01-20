@@ -55,6 +55,8 @@ const getTodayFortune = (): { message: string; experience: number } => {
 };
 
 export default class Bonus {
+  private db: FirebaseFirestore.Firestore;
+
   constructor() {
     const firebaseConfig = {
       apiKey: "AIzaSyDYyN8Tl4vSpil1r1xdlTqVEDoaxzBrMMY",
@@ -72,35 +74,62 @@ export default class Bonus {
     });
 
     this.db = admin.firestore();
+
+    this.resetLogin();
   }
 
-  db: FirebaseFirestore.Firestore;
-
-  async update(
+  public async update(
     id: string,
     user: User,
     misskeyUtils: MisskeyUtils
   ): Promise<void> {
     const fortune = getTodayFortune();
-    misskeyUtils.replyHome(fortune.message, id);
 
-    const docRef = await this.db.collection("users").doc(user.id);
-    if (docRef) {
+    const host = user.host ?? "misskey.m544.net";
+    const userDocRef = await this.db
+      .collection("hosts")
+      .doc(host)
+      .collection("users")
+      .doc(user.id);
+    const userDoc = await userDocRef.get();
+    if (userDoc.exists) {
       // 存在するなら更新処理
-      console.debug("存在するやで");
+      if (userDoc.data()?.isLogin) {
+        // ログインしていたら
+        misskeyUtils.replyHome("本日は既にログイン済みです", id);
+      } else {
+        // ログインしていなかったら
+        await userDocRef.update({
+          experience: admin.firestore.FieldValue.increment(fortune.experience),
+          avatarUrl: user.avatarUrl,
+          username: user.username,
+          name: user.name,
+          isLogin: true
+        });
+        const doc = await userDocRef.get();
+        const data = doc.data();
+        misskeyUtils.replyHome(
+          fortune.message + "現在の経験値: " + data?.experience,
+          id
+        );
+      }
     } else {
       // 存在しないなら作成処理
       const data = {
         avatarUrl: user.avatarUrl,
         username: user.username,
-        experience: fortune.experience
+        experience: fortune.experience,
+        name: user.name,
+        isLogin: false
       };
-      const setDoc = await this.db
-        .collection("users")
-        .doc(user.id)
-        .set(data);
-
-      console.debug(setDoc + " " + user);
+      await userDocRef.set(data);
     }
+  }
+
+  public async resetLogin() {
+    const hosts = await this.db.collection("hosts").listDocuments();
+    hosts.forEach(host => {
+      console.log(host.id);
+    });
   }
 }
