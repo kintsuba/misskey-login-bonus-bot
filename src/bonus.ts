@@ -120,7 +120,8 @@ export default class Bonus {
           avatarUrl: user.avatarUrl,
           username: user.username,
           name: user.name,
-          isLogin: true
+          isLogin: true,
+          isLastLogin: true
         });
         const doc = await userDocRef.get();
         const data = doc.data();
@@ -150,7 +151,8 @@ export default class Bonus {
         name: user.name,
         level: level,
         experienceNextLevelNeed: experienceNextLevelNeed,
-        isLogin: false
+        isLogin: true,
+        isLastLogin: true
       };
       await userDocRef.set(data);
       misskeyUtils.replyHome(
