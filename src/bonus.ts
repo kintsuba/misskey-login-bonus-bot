@@ -1,4 +1,5 @@
 import MisskeyUtils from "./misskey-utils";
+import experienceTable from "./experience-table";
 import firebase from "firebase/app";
 import "firebase/firestore";
 import admin from "firebase-admin";
@@ -54,6 +55,23 @@ const getTodayFortune = (): { message: string; experience: number } => {
   }
 };
 
+const experienceToLevel = (
+  experience: number,
+  level = 1
+): { level: number; experienceNextLevelNeed: number } => {
+  if (experience >= experienceTable[level - 1]) {
+    return experienceToLevel(
+      experience - experienceTable[level - 1],
+      level + 1
+    );
+  } else {
+    return {
+      level: level,
+      experienceNextLevelNeed: experienceTable[level - 1] - experience
+    };
+  }
+};
+
 export default class Bonus {
   private db: FirebaseFirestore.Firestore;
 
@@ -74,8 +92,6 @@ export default class Bonus {
     });
 
     this.db = admin.firestore();
-
-    this.resetLogin();
   }
 
   public async update(
@@ -108,28 +124,53 @@ export default class Bonus {
         });
         const doc = await userDocRef.get();
         const data = doc.data();
+        const { level, experienceNextLevelNeed } = experienceToLevel(
+          data?.experience
+        );
+        await userDocRef.update({
+          level: level,
+          experienceNextLevelNeed: experienceNextLevelNeed
+        });
+
         misskeyUtils.replyHome(
-          fortune.message + "現在の経験値: " + data?.experience,
+          `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**`,
           id
         );
       }
     } else {
       // 存在しないなら作成処理
+      const { level, experienceNextLevelNeed } = experienceToLevel(
+        fortune.experience
+      );
+
       const data = {
         avatarUrl: user.avatarUrl,
         username: user.username,
         experience: fortune.experience,
         name: user.name,
+        level: level,
+        experienceNextLevelNeed: experienceNextLevelNeed,
         isLogin: false
       };
       await userDocRef.set(data);
+      misskeyUtils.replyHome(
+        `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**`,
+        id
+      );
     }
   }
 
-  public async resetLogin() {
+  public async resetLogin(): Promise<void> {
+    const batch = this.db.batch();
+
     const hosts = await this.db.collection("hosts").listDocuments();
-    hosts.forEach(host => {
-      console.log(host.id);
-    });
+    for (const host of hosts) {
+      const users = await host.collection("users").listDocuments();
+      for (const user of users) {
+        batch.update(user, { isLogin: false });
+      }
+    }
+
+    await batch.commit();
   }
 }

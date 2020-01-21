@@ -42,7 +42,7 @@ const removeNotFollowed = async (
 
 const periodicallyJobs = (misskeyUtils: MisskeyUtils, bonus: Bonus): void => {
   const fiveOclockJob = schedule.scheduleJob("00 05 * * *", () => {
-    // firebase uncheck isGetBonus
+    bonus.resetLogin();
     removeNotFollowed(misskeyUtils);
     misskeyUtils.noteHome(
       `5時になったので、**${moment().format(
