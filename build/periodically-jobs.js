@@ -20,7 +20,7 @@ const removeNotFollowed = async (misskeyUtils) => {
         });
         const response = misskeyUtils.fetchJson("https://misskey.m544.net/api/users/following", checkFollowByIdJson);
         const followingUserFollowingData = await response;
-        if (!followingUserFollowingData.users.some((user) => user.username === "cordreel")) {
+        if (!followingUserFollowingData.users.some((user) => user.username === "LoginBonus")) {
             misskeyUtils.unfollow(user.id);
             return true;
         }

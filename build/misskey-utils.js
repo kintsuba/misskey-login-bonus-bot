@@ -132,6 +132,14 @@ class MisskeyUtils {
             });
             return this.fetchJson("https://misskey.m544.net/api/messaging/messages/create", messageJson, "include");
         };
+        this.reaction = (emoji, noteId) => {
+            const createReactionJson = JSON.stringify({
+                noteId: noteId,
+                reaction: emoji,
+                i: this.token
+            });
+            return this.fetchJson("https://misskey.m544.net/api/notes/reactions/create", createReactionJson, "include");
+        };
         this.follow = (userId) => {
             const followJson = JSON.stringify({
                 userId: userId,

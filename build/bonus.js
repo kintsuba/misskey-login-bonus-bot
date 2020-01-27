@@ -71,7 +71,7 @@ class Bonus {
         this.db = firebase_admin_1.default.firestore();
     }
     async update(id, user, misskeyUtils) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         const fortune = getTodayFortune();
         const host = (_a = user.host, (_a !== null && _a !== void 0 ? _a : "misskey.m544.net"));
         const userDocRef = await this.db
@@ -84,30 +84,36 @@ class Bonus {
             // 存在するなら更新処理
             if ((_b = userDoc.data()) === null || _b === void 0 ? void 0 : _b.isLogin) {
                 // ログインしていたら
-                misskeyUtils.replyHome("本日は既にログイン済みです", id);
+                misskeyUtils.reaction("❎", id);
+                misskeyUtils.replyHome(`本日は既にログイン済みです。\n現在のレベル: **${(_c = userDoc.data()) === null || _c === void 0 ? void 0 : _c.level}**\n次のレベルまで: **${(_d = userDoc.data()) === null || _d === void 0 ? void 0 : _d.experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_e = userDoc.data()) === null || _e === void 0 ? void 0 : _e.continuousloginDays}日**\n合計ログイン: **${(_f = userDoc.data()) === null || _f === void 0 ? void 0 : _f.continuousloginDays}日**`, id);
             }
             else {
                 // ログインしていなかったら
+                misskeyUtils.reaction("⭕", id);
                 await userDocRef.update({
                     experience: firebase_admin_1.default.firestore.FieldValue.increment(fortune.experience),
                     avatarUrl: user.avatarUrl,
                     username: user.username,
                     name: user.name,
                     isLogin: true,
-                    isLastLogin: true
+                    isLastLogin: true,
+                    continuousloginDays: ((_g = userDoc.data()) === null || _g === void 0 ? void 0 : _g.isLastLogin) ? firebase_admin_1.default.firestore.FieldValue.increment(1)
+                        : 1,
+                    totalLoginDays: firebase_admin_1.default.firestore.FieldValue.increment(1)
                 });
                 const doc = await userDocRef.get();
                 const data = doc.data();
-                const { level, experienceNextLevelNeed } = experienceToLevel((_c = data) === null || _c === void 0 ? void 0 : _c.experience);
+                const { level, experienceNextLevelNeed } = experienceToLevel((_h = data) === null || _h === void 0 ? void 0 : _h.experience);
                 await userDocRef.update({
                     level: level,
                     experienceNextLevelNeed: experienceNextLevelNeed
                 });
-                misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**`, id);
+                misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_j = data) === null || _j === void 0 ? void 0 : _j.continuousloginDays}日**\n合計ログイン: **${(_k = data) === null || _k === void 0 ? void 0 : _k.continuousloginDays}日**`, id);
             }
         }
         else {
             // 存在しないなら作成処理
+            misskeyUtils.reaction("⭕", id);
             const { level, experienceNextLevelNeed } = experienceToLevel(fortune.experience);
             const data = {
                 avatarUrl: user.avatarUrl,
@@ -117,10 +123,12 @@ class Bonus {
                 level: level,
                 experienceNextLevelNeed: experienceNextLevelNeed,
                 isLogin: true,
-                isLastLogin: true
+                isLastLogin: true,
+                continuousloginDays: 1,
+                totalLoginDays: 1
             };
             await userDocRef.set(data);
-            misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**`, id);
+            misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_l = data) === null || _l === void 0 ? void 0 : _l.continuousloginDays}日**\n合計ログイン: **${(_m = data) === null || _m === void 0 ? void 0 : _m.continuousloginDays}日**`, id);
         }
     }
     async resetLogin() {

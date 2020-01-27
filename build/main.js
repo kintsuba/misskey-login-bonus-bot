@@ -14,7 +14,6 @@ const misskey_utils_1 = __importDefault(require("./misskey-utils"));
 const WebSocket = __importStar(require("websocket"));
 const bonus_1 = __importDefault(require("./bonus"));
 const periodically_jobs_1 = __importDefault(require("./periodically-jobs"));
-require("firebase/firestore");
 require("dotenv").config();
 if (!process.env.MISSKEY_TOKEN) {
     console.error("Make .env file.");
@@ -54,7 +53,7 @@ client.on("connect", connection => {
         }
         else if (data.body.id === "forhybridtl" && data.body.type == "note") {
             console.debug(data);
-            if (/ログインボーナス|ログボ/.test(data.body.body.text)) {
+            if (/ログインボーナス|ログボ|ろぐいんぼーなす|ろぐぼ/.test(data.body.body.text)) {
                 if (data.body.body.userId === botId)
                     return; // 自分自身は弾く
                 bonus.update(data.body.body.id, data.body.body.user, misskeyUtils);
