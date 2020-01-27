@@ -28,7 +28,7 @@ const removeNotFollowed = async (
     const followingUserFollowingData = await response;
     if (
       !followingUserFollowingData.users.some(
-        (user: any) => user.username === "cordreel"
+        (user: any) => user.username === "LoginBonus"
       )
     ) {
       misskeyUtils.unfollow(user.id);
