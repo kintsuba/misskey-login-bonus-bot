@@ -2,8 +2,6 @@ import MisskeyUtils from "./misskey-utils";
 import * as WebSocket from "websocket";
 import Bonus from "./bonus";
 import periodicallyJobs from "./periodically-jobs";
-import * as firebase from "firebase/app";
-import "firebase/firestore";
 
 require("dotenv").config();
 
@@ -57,7 +55,11 @@ client.on("connect", connection => {
       misskeyUtils.follow(data.body.body.id);
     } else if (data.body.id === "forhybridtl" && data.body.type == "note") {
       console.debug(data);
-      if (/ログインボーナス|ログボ/.test(data.body.body.text)) {
+      if (
+        /ログインボーナス|ログボ|ろぐいんぼーなす|ろぐぼ/.test(
+          data.body.body.text
+        )
+      ) {
         if (data.body.body.userId === botId) return; // 自分自身は弾く
         bonus.update(data.body.body.id, data.body.body.user, misskeyUtils);
       }
