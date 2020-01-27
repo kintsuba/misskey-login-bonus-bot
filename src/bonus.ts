@@ -112,9 +112,20 @@ export default class Bonus {
       // 存在するなら更新処理
       if (userDoc.data()?.isLogin) {
         // ログインしていたら
-        misskeyUtils.replyHome("本日は既にログイン済みです", id);
+        misskeyUtils.reaction("❎", id);
+
+        misskeyUtils.replyHome(
+          `本日は既にログイン済みです。\n現在のレベル: **${
+            userDoc.data()?.level
+          }**\n次のレベルまで: **${
+            userDoc.data()?.experienceNextLevelNeed
+          }ポイント**`,
+          id
+        );
       } else {
         // ログインしていなかったら
+        misskeyUtils.reaction("⭕", id);
+
         await userDocRef.update({
           experience: admin.firestore.FieldValue.increment(fortune.experience),
           avatarUrl: user.avatarUrl,
@@ -140,6 +151,8 @@ export default class Bonus {
       }
     } else {
       // 存在しないなら作成処理
+      misskeyUtils.reaction("⭕", id);
+
       const { level, experienceNextLevelNeed } = experienceToLevel(
         fortune.experience
       );

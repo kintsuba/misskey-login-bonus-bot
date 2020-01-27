@@ -191,6 +191,18 @@ export default class MisskeyUtils {
       "include"
     );
   };
+  reaction = (emoji: string, noteId: string): Promise<Record<string, any>> => {
+    const createReactionJson = JSON.stringify({
+      noteId: noteId,
+      reaction: emoji,
+      i: this.token
+    });
+    return this.fetchJson(
+      "https://misskey.m544.net/api/notes/reactions/create",
+      createReactionJson,
+      "include"
+    );
+  };
 
   follow = (userId: string): Promise<Record<string, any>> => {
     const followJson = JSON.stringify({
