@@ -119,7 +119,9 @@ export default class Bonus {
             userDoc.data()?.level
           }**\n次のレベルまで: **${
             userDoc.data()?.experienceNextLevelNeed
-          }ポイント**`,
+          }ポイント**\n連続ログイン: **${
+            userDoc.data()?.continuousloginDays
+          }日**\n合計ログイン: **${userDoc.data()?.continuousloginDays}日**`,
           id
         );
       } else {
@@ -132,7 +134,11 @@ export default class Bonus {
           username: user.username,
           name: user.name,
           isLogin: true,
-          isLastLogin: true
+          isLastLogin: true,
+          continuousloginDays: userDoc.data()?.isLastLogin
+            ? admin.firestore.FieldValue.increment(1)
+            : 1,
+          totalLoginDays: admin.firestore.FieldValue.increment(1)
         });
         const doc = await userDocRef.get();
         const data = doc.data();
@@ -145,7 +151,7 @@ export default class Bonus {
         });
 
         misskeyUtils.replyHome(
-          `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**`,
+          `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.continuousloginDays}日**`,
           id
         );
       }
@@ -165,11 +171,13 @@ export default class Bonus {
         level: level,
         experienceNextLevelNeed: experienceNextLevelNeed,
         isLogin: true,
-        isLastLogin: true
+        isLastLogin: true,
+        continuousloginDays: 1,
+        totalLoginDays: 1
       };
       await userDocRef.set(data);
       misskeyUtils.replyHome(
-        `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**`,
+        `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.continuousloginDays}日**`,
         id
       );
     }
