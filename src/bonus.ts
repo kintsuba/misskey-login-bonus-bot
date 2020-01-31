@@ -173,7 +173,8 @@ export default class Bonus {
         isLogin: true,
         isLastLogin: true,
         continuousloginDays: 1,
-        totalLoginDays: 1
+        totalLoginDays: 1,
+        host: user.host
       };
       await userDocRef.set(data);
       misskeyUtils.replyHome(
