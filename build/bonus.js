@@ -125,7 +125,8 @@ class Bonus {
                 isLogin: true,
                 isLastLogin: true,
                 continuousloginDays: 1,
-                totalLoginDays: 1
+                totalLoginDays: 1,
+                host: user.host
             };
             await userDocRef.set(data);
             misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_l = data) === null || _l === void 0 ? void 0 : _l.continuousloginDays}日**\n合計ログイン: **${(_m = data) === null || _m === void 0 ? void 0 : _m.continuousloginDays}日**`, id);
