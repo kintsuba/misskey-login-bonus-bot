@@ -199,7 +199,5 @@ export default class Bonus {
         }
       }
     });
-
-    // await batch.commit();
   }
 }
