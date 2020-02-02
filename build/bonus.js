@@ -85,7 +85,7 @@ class Bonus {
             if ((_b = userDoc.data()) === null || _b === void 0 ? void 0 : _b.isLogin) {
                 // ログインしていたら
                 misskeyUtils.reaction("❎", id);
-                misskeyUtils.replyHome(`本日は既にログイン済みです。\n現在のレベル: **${(_c = userDoc.data()) === null || _c === void 0 ? void 0 : _c.level}**\n次のレベルまで: **${(_d = userDoc.data()) === null || _d === void 0 ? void 0 : _d.experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_e = userDoc.data()) === null || _e === void 0 ? void 0 : _e.continuousloginDays}日**\n合計ログイン: **${(_f = userDoc.data()) === null || _f === void 0 ? void 0 : _f.continuousloginDays}日**`, id);
+                misskeyUtils.replyHome(`本日は既にログイン済みです。\n現在のレベル: **${(_c = userDoc.data()) === null || _c === void 0 ? void 0 : _c.level}**\n次のレベルまで: **${(_d = userDoc.data()) === null || _d === void 0 ? void 0 : _d.experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_e = userDoc.data()) === null || _e === void 0 ? void 0 : _e.continuousloginDays}日**\n合計ログイン: **${(_f = userDoc.data()) === null || _f === void 0 ? void 0 : _f.continuousloginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`, id);
             }
             else {
                 // ログインしていなかったら
@@ -96,7 +96,6 @@ class Bonus {
                     username: user.username,
                     name: user.name,
                     isLogin: true,
-                    isLastLogin: true,
                     continuousloginDays: ((_g = userDoc.data()) === null || _g === void 0 ? void 0 : _g.isLastLogin) ? firebase_admin_1.default.firestore.FieldValue.increment(1)
                         : 1,
                     totalLoginDays: firebase_admin_1.default.firestore.FieldValue.increment(1)
@@ -108,7 +107,7 @@ class Bonus {
                     level: level,
                     experienceNextLevelNeed: experienceNextLevelNeed
                 });
-                misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_j = data) === null || _j === void 0 ? void 0 : _j.continuousloginDays}日**\n合計ログイン: **${(_k = data) === null || _k === void 0 ? void 0 : _k.continuousloginDays}日**`, id);
+                misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_j = data) === null || _j === void 0 ? void 0 : _j.continuousloginDays}日**\n合計ログイン: **${(_k = data) === null || _k === void 0 ? void 0 : _k.continuousloginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`, id);
             }
         }
         else {
@@ -123,25 +122,32 @@ class Bonus {
                 level: level,
                 experienceNextLevelNeed: experienceNextLevelNeed,
                 isLogin: true,
-                isLastLogin: true,
+                isLastLogin: false,
                 continuousloginDays: 1,
                 totalLoginDays: 1,
                 host: user.host
             };
             await userDocRef.set(data);
-            misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_l = data) === null || _l === void 0 ? void 0 : _l.continuousloginDays}日**\n合計ログイン: **${(_m = data) === null || _m === void 0 ? void 0 : _m.continuousloginDays}日**`, id);
+            misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_l = data) === null || _l === void 0 ? void 0 : _l.continuousloginDays}日**\n合計ログイン: **${(_m = data) === null || _m === void 0 ? void 0 : _m.continuousloginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`, id);
         }
     }
     async resetLogin() {
-        const batch = this.db.batch();
-        const hosts = await this.db.collection("hosts").listDocuments();
-        for (const host of hosts) {
-            const users = await host.collection("users").listDocuments();
-            for (const user of users) {
-                batch.update(user, { isLogin: false });
+        this.db.runTransaction(async (t) => {
+            const hosts = await this.db.collection("hosts").listDocuments();
+            for (const host of hosts) {
+                const users = await host.collection("users").listDocuments();
+                for (const user of users) {
+                    t.get(user).then(doc => {
+                        var _a;
+                        const isLogin = (_a = doc.data()) === null || _a === void 0 ? void 0 : _a.isLogin;
+                        t.update(user, {
+                            isLogin: false,
+                            isLastLogin: isLogin
+                        });
+                    });
+                }
             }
-        }
-        await batch.commit();
+        });
     }
 }
 exports.default = Bonus;
