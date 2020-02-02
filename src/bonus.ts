@@ -134,7 +134,6 @@ export default class Bonus {
           username: user.username,
           name: user.name,
           isLogin: true,
-          isLastLogin: true,
           continuousloginDays: userDoc.data()?.isLastLogin
             ? admin.firestore.FieldValue.increment(1)
             : 1,
@@ -171,7 +170,7 @@ export default class Bonus {
         level: level,
         experienceNextLevelNeed: experienceNextLevelNeed,
         isLogin: true,
-        isLastLogin: true,
+        isLastLogin: false,
         continuousloginDays: 1,
         totalLoginDays: 1,
         host: user.host
@@ -185,16 +184,22 @@ export default class Bonus {
   }
 
   public async resetLogin(): Promise<void> {
-    const batch = this.db.batch();
-
-    const hosts = await this.db.collection("hosts").listDocuments();
-    for (const host of hosts) {
-      const users = await host.collection("users").listDocuments();
-      for (const user of users) {
-        batch.update(user, { isLogin: false });
+    this.db.runTransaction(async t => {
+      const hosts = await this.db.collection("hosts").listDocuments();
+      for (const host of hosts) {
+        const users = await host.collection("users").listDocuments();
+        for (const user of users) {
+          t.get(user).then(doc => {
+            const isLogin = doc.data()?.isLogin;
+            t.update(user, {
+              isLogin: false,
+              isLastLogin: isLogin
+            });
+          });
+        }
       }
-    }
+    });
 
-    await batch.commit();
+    // await batch.commit();
   }
 }
