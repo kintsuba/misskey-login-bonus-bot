@@ -132,22 +132,18 @@ class Bonus {
         }
     }
     async resetLogin() {
-        this.db.runTransaction(async (t) => {
-            const hosts = await this.db.collection("hosts").listDocuments();
-            for (const host of hosts) {
-                const users = await host.collection("users").listDocuments();
-                for (const user of users) {
-                    t.get(user).then(doc => {
-                        var _a;
-                        const isLogin = (_a = doc.data()) === null || _a === void 0 ? void 0 : _a.isLogin;
-                        t.update(user, {
-                            isLogin: false,
-                            isLastLogin: isLogin
-                        });
-                    });
-                }
+        var _a;
+        const hosts = await this.db.collection("hosts").listDocuments();
+        for (const host of hosts) {
+            const users = await host.collection("users").listDocuments();
+            for (const user of users) {
+                const userData = await user.get();
+                user.update({
+                    isLastLogin: (_a = userData.data()) === null || _a === void 0 ? void 0 : _a.isLogin,
+                    isLogin: false
+                });
             }
-        });
+        }
     }
 }
 exports.default = Bonus;
