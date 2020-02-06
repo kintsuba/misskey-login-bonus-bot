@@ -122,7 +122,7 @@ export default class Bonus {
           }ポイント**\n連続ログイン: **${
             userDoc.data()?.continuousloginDays
           }日**\n合計ログイン: **${
-            userDoc.data()?.continuousloginDays
+            userDoc.data()?.totalLoginDays
           }日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
           id
         );
@@ -152,7 +152,7 @@ export default class Bonus {
         });
 
         misskeyUtils.replyHome(
-          `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.continuousloginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
+          `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
           id
         );
       }
@@ -179,7 +179,7 @@ export default class Bonus {
       };
       await userDocRef.set(data);
       misskeyUtils.replyHome(
-        `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.continuousloginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
+        `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
         id
       );
     }
