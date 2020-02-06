@@ -85,7 +85,7 @@ class Bonus {
             if ((_b = userDoc.data()) === null || _b === void 0 ? void 0 : _b.isLogin) {
                 // ログインしていたら
                 misskeyUtils.reaction("❎", id);
-                misskeyUtils.replyHome(`本日は既にログイン済みです。\n現在のレベル: **${(_c = userDoc.data()) === null || _c === void 0 ? void 0 : _c.level}**\n次のレベルまで: **${(_d = userDoc.data()) === null || _d === void 0 ? void 0 : _d.experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_e = userDoc.data()) === null || _e === void 0 ? void 0 : _e.continuousloginDays}日**\n合計ログイン: **${(_f = userDoc.data()) === null || _f === void 0 ? void 0 : _f.continuousloginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`, id);
+                misskeyUtils.replyHome(`本日は既にログイン済みです。\n現在のレベル: **${(_c = userDoc.data()) === null || _c === void 0 ? void 0 : _c.level}**\n次のレベルまで: **${(_d = userDoc.data()) === null || _d === void 0 ? void 0 : _d.experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_e = userDoc.data()) === null || _e === void 0 ? void 0 : _e.continuousloginDays}日**\n合計ログイン: **${(_f = userDoc.data()) === null || _f === void 0 ? void 0 : _f.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`, id);
             }
             else {
                 // ログインしていなかったら
@@ -107,7 +107,7 @@ class Bonus {
                     level: level,
                     experienceNextLevelNeed: experienceNextLevelNeed
                 });
-                misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_j = data) === null || _j === void 0 ? void 0 : _j.continuousloginDays}日**\n合計ログイン: **${(_k = data) === null || _k === void 0 ? void 0 : _k.continuousloginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`, id);
+                misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_j = data) === null || _j === void 0 ? void 0 : _j.continuousloginDays}日**\n合計ログイン: **${(_k = data) === null || _k === void 0 ? void 0 : _k.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`, id);
             }
         }
         else {
@@ -128,7 +128,7 @@ class Bonus {
                 host: host
             };
             await userDocRef.set(data);
-            misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_l = data) === null || _l === void 0 ? void 0 : _l.continuousloginDays}日**\n合計ログイン: **${(_m = data) === null || _m === void 0 ? void 0 : _m.continuousloginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`, id);
+            misskeyUtils.replyHome(`${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${(_l = data) === null || _l === void 0 ? void 0 : _l.continuousloginDays}日**\n合計ログイン: **${(_m = data) === null || _m === void 0 ? void 0 : _m.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`, id);
         }
     }
     async resetLogin() {
