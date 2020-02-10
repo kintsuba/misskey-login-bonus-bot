@@ -11,7 +11,7 @@ const firebase_admin_1 = __importDefault(require("firebase-admin"));
 const serviceAccount = require("../key/misskey-login-bonus-c1453cb75c30.json");
 const getTodayFortune = () => {
     const rand = Math.random() * 100;
-    if (rand === 0) {
+    if (0 <= rand && rand < 1) {
         return {
             message: "**Awesome!** 経験値を**100ポイント**手に入れた！",
             experience: 100
