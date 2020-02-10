@@ -27,7 +27,7 @@ interface User {
 const getTodayFortune = (): { message: string; experience: number } => {
   const rand = Math.random() * 100;
 
-  if (rand === 0) {
+  if (0 <= rand && rand < 1) {
     return {
       message: "**Awesome!** 経験値を**100ポイント**手に入れた！",
       experience: 100
