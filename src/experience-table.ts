@@ -97,7 +97,17 @@ const experienceTable = [
   75,
   75,
   75,
-  75 // 99 → 100
+  75, // 99 → 100
+  100,
+  100,
+  100,
+  100,
+  100,
+  100,
+  100,
+  100,
+  100,
+  100 // 109 → 110
 ];
 
 export default experienceTable;
