@@ -13,7 +13,7 @@ enum Visibility {
   Public = "public",
   Followers = "followers",
   Specified = "specified",
-  Private = "private"
+  Private = "private",
 }
 export default class MisskeyUtils {
   static readonly Visibility = Visibility;
@@ -33,10 +33,10 @@ export default class MisskeyUtils {
     const postData = {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       credentials: credentials,
-      body: json
+      body: json,
     };
 
     const response = await fetch(url, postData);
@@ -54,12 +54,12 @@ export default class MisskeyUtils {
   note = ({
     text,
     visibility,
-    replyId = "",
-    renoteId = "",
+    replyId,
+    renoteId,
     cw,
     localOnly = false,
-    poll = { multiple: false },
-    visibleUserIds
+    poll,
+    visibleUserIds,
   }: {
     text: string;
     visibility: Visibility;
@@ -79,12 +79,12 @@ export default class MisskeyUtils {
       cw: cw,
       poll: poll,
       visibleUserIds: visibleUserIds,
-      i: this.token
+      i: this.token,
     };
     if (!cw) delete noteObj.cw;
     if (!replyId) delete noteObj.replyId;
     if (!renoteId) delete noteObj.renoteId;
-    if (!poll.choices || poll.choices.length === 0) delete noteObj.poll;
+    if (!poll?.choices || poll.choices.length === 0) delete noteObj.poll;
     if (!visibleUserIds || visibleUserIds.length === 0)
       delete noteObj.visibleUserIds;
 
@@ -99,26 +99,26 @@ export default class MisskeyUtils {
   noteHome = (text: string): Promise<Record<string, any>> => {
     return this.note({
       text: text,
-      visibility: MisskeyUtils.Visibility.Home
+      visibility: MisskeyUtils.Visibility.Home,
     });
   };
   noteFollowers = (text: string): Promise<Record<string, any>> => {
     return this.note({
       text: text,
-      visibility: MisskeyUtils.Visibility.Followers
+      visibility: MisskeyUtils.Visibility.Followers,
     });
   };
   notePublic = (text: string): Promise<Record<string, any>> => {
     return this.note({
       text: text,
-      visibility: MisskeyUtils.Visibility.Public
+      visibility: MisskeyUtils.Visibility.Public,
     });
   };
   replyHome = (text: string, replyId: string): Promise<Record<string, any>> => {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Home,
-      replyId: replyId
+      replyId: replyId,
     });
   };
   replyFollowers = (
@@ -128,7 +128,7 @@ export default class MisskeyUtils {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Followers,
-      replyId: replyId
+      replyId: replyId,
     });
   };
   replyPublic = (
@@ -138,7 +138,7 @@ export default class MisskeyUtils {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Public,
-      replyId: replyId
+      replyId: replyId,
     });
   };
   replySpecified = (
@@ -150,7 +150,7 @@ export default class MisskeyUtils {
       text: text,
       visibility: MisskeyUtils.Visibility.Specified,
       replyId: replyId,
-      visibleUserIds: visibleUserIds
+      visibleUserIds: visibleUserIds,
     });
   };
   replyHomeWithPoll = (
@@ -162,7 +162,7 @@ export default class MisskeyUtils {
       text: text,
       visibility: MisskeyUtils.Visibility.Home,
       replyId: replyId,
-      poll: poll
+      poll: poll,
     });
   };
   replySpecifiedWithPoll = (
@@ -176,14 +176,14 @@ export default class MisskeyUtils {
       visibility: MisskeyUtils.Visibility.Specified,
       replyId: replyId,
       visibleUserIds: visibleUserIds,
-      poll: poll
+      poll: poll,
     });
   };
   message = (text: string, userId: string): Promise<Record<string, any>> => {
     const messageJson = JSON.stringify({
       userId: userId,
       text: text,
-      i: this.token
+      i: this.token,
     });
     return this.fetchJson(
       "https://misskey.m544.net/api/messaging/messages/create",
@@ -195,7 +195,7 @@ export default class MisskeyUtils {
     const createReactionJson = JSON.stringify({
       noteId: noteId,
       reaction: emoji,
-      i: this.token
+      i: this.token,
     });
     return this.fetchJson(
       "https://misskey.m544.net/api/notes/reactions/create",
@@ -207,7 +207,7 @@ export default class MisskeyUtils {
   follow = (userId: string): Promise<Record<string, any>> => {
     const followJson = JSON.stringify({
       userId: userId,
-      i: this.token
+      i: this.token,
     });
     return this.fetchJson(
       "https://misskey.m544.net/api/following/create",
@@ -218,7 +218,7 @@ export default class MisskeyUtils {
   unfollow = (userId: string): Promise<Record<string, any>> => {
     const unfollowJson = JSON.stringify({
       userId: userId,
-      i: this.token
+      i: this.token,
     });
     return this.fetchJson(
       "https://misskey.m544.net/api/following/create",
@@ -232,8 +232,8 @@ export default class MisskeyUtils {
       JSON.stringify({
         type: "subNote",
         body: {
-          id: id
-        }
+          id: id,
+        },
       })
     );
   };
@@ -242,8 +242,8 @@ export default class MisskeyUtils {
       JSON.stringify({
         type: "unsubNote",
         body: {
-          id: id
-        }
+          id: id,
+        },
       })
     );
   };
@@ -252,35 +252,35 @@ export default class MisskeyUtils {
     type: "connect",
     body: {
       channel: "main",
-      id: "formain"
-    }
+      id: "formain",
+    },
   });
   static readonly connectLocalTLJson = JSON.stringify({
     type: "connect",
     body: {
       channel: "localTimeline",
-      id: "forlocaltl"
-    }
+      id: "forlocaltl",
+    },
   });
   static readonly connectHybridTLJson = JSON.stringify({
     type: "connect",
     body: {
       channel: "hybridTimeline",
-      id: "forhybridtl"
-    }
+      id: "forhybridtl",
+    },
   });
   static readonly connectHomeTLJson = JSON.stringify({
     type: "connect",
     body: {
       channel: "localTimeline",
-      id: "forhometl"
-    }
+      id: "forhometl",
+    },
   });
   static readonly connectGlobalTLJson = JSON.stringify({
     type: "connect",
     body: {
       channel: "globalTimeline",
-      id: "forglobaltl"
-    }
+      id: "forglobaltl",
+    },
   });
 }

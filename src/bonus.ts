@@ -1,6 +1,6 @@
 import MisskeyUtils from "./misskey-utils";
 import experienceTable from "./experience-table";
-import firebase from "firebase/app";
+import * as firebase from "firebase/app";
 import "firebase/firestore";
 import admin from "firebase-admin";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -30,27 +30,27 @@ const getTodayFortune = (): { message: string; experience: number } => {
   if (0 <= rand && rand < 1) {
     return {
       message: "**Awesome!** 経験値を**100ポイント**手に入れた！",
-      experience: 100
+      experience: 100,
     };
   } else if (1 <= rand && rand < 6) {
     return {
       message: "**Great!** 経験値を**50ポイント**手に入れた！",
-      experience: 50
+      experience: 50,
     };
   } else if (6 <= rand && rand < 26) {
     return {
       message: "**Lucky!** 経験値を**20ポイント**手に入れた！",
-      experience: 20
+      experience: 20,
     };
   } else if (26 <= rand && rand < 100) {
     return {
       message: "経験値を**10ポイント**手に入れた！",
-      experience: 10
+      experience: 10,
     };
   } else {
     return {
       message: "経験値が手に入らなかった……",
-      experience: 0
+      experience: 0,
     };
   }
 };
@@ -67,7 +67,7 @@ const experienceToLevel = (
   } else {
     return {
       level: level,
-      experienceNextLevelNeed: experienceTable[level - 1] - experience
+      experienceNextLevelNeed: experienceTable[level - 1] - experience,
     };
   }
 };
@@ -83,12 +83,12 @@ export default class Bonus {
       projectId: "misskey-login-bonus",
       storageBucket: "misskey-login-bonus.appspot.com",
       messagingSenderId: "1046728037357",
-      appId: "1:1046728037357:web:81576eae5e5fc01715cde4"
+      appId: "1:1046728037357:web:81576eae5e5fc01715cde4",
     };
     firebase.initializeApp(firebaseConfig);
 
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+      credential: admin.credential.cert(serviceAccount),
     });
 
     this.db = admin.firestore();
@@ -140,7 +140,7 @@ export default class Bonus {
           continuousloginDays: userDoc.data()?.isLastLogin
             ? admin.firestore.FieldValue.increment(1)
             : 1,
-          totalLoginDays: admin.firestore.FieldValue.increment(1)
+          totalLoginDays: admin.firestore.FieldValue.increment(1),
         });
         const doc = await userDocRef.get();
         const data = doc.data();
@@ -149,7 +149,7 @@ export default class Bonus {
         );
         await userDocRef.update({
           level: level,
-          experienceNextLevelNeed: experienceNextLevelNeed
+          experienceNextLevelNeed: experienceNextLevelNeed,
         });
 
         misskeyUtils.replySpecified(
@@ -177,7 +177,7 @@ export default class Bonus {
         isLastLogin: false,
         continuousloginDays: 1,
         totalLoginDays: 1,
-        host: host
+        host: host,
       };
       await userDocRef.set(data);
       misskeyUtils.replySpecified(
@@ -196,7 +196,7 @@ export default class Bonus {
         const userData = await user.get();
         user.update({
           isLastLogin: userData.data()?.isLogin,
-          isLogin: false
+          isLogin: false,
         });
       }
     }
