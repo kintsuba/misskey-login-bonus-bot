@@ -84,3 +84,5 @@ typings/
 .dynamodb/
 
 key
+
+build
