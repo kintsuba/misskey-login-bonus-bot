@@ -4,7 +4,7 @@ import * as firebase from "firebase/app";
 import "firebase/firestore";
 import admin from "firebase-admin";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const serviceAccount = require("../key/misskey-login-bonus-c1453cb75c30.json");
+import * as serviceAccount from "../key/misskey-login-bonus-c1453cb75c30.json";
 
 interface User {
   id: string;
@@ -88,7 +88,7 @@ export default class Bonus {
     firebase.initializeApp(firebaseConfig);
 
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: admin.credential.cert(serviceAccount as unknown as string),
     });
 
     this.db = admin.firestore();

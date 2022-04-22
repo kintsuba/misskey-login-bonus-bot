@@ -1,5 +1,4 @@
 import * as WebSocket from "websocket";
-import fetch from "node-fetch";
 
 type Poll = {
   choices?: string[];
@@ -39,15 +38,15 @@ export default class MisskeyUtils {
       body: json,
     };
 
-    const response = await fetch(url, postData);
+    const response = await fetch(url, postData as RequestInit);
     if (response.ok) {
       console.log(`${response.status} OK`);
       // console.log(await response.text());
-      return await response.json();
+      return (await response.json()) as Record<string, any>;
     } else {
       console.log(`${response.status} Error`);
       // console.log(await response.text());
-      return await response.json();
+      return (await response.json()) as Record<string, any>;
     }
   };
 
