@@ -12,13 +12,16 @@
   },
   "dependencies": {
     "@types/dotenv": "^8.2.0",
-    "@types/node-fetch": "^2.6.1",
     "dotenv": "^16.0.0",
     "firebase": "^9.6.11",
     "firebase-admin": "^10.1.0",
     "moment": "^2.29.3",
-    "node-fetch": "^3.2.3",
     "node-schedule": "^2.1.0",
     "websocket": "^1.0.30"
+  },
+  "resolutions": {
+    "node-fetch": "~2.6.7",
+    "node-forge": "^1.0.0",
+    "ansi-regex": "~5.0.1"
   }
 }
