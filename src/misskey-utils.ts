@@ -25,11 +25,7 @@ export default class MisskeyUtils {
     this.connection = connection;
   }
 
-  fetchJson = async (
-    url: string,
-    json: string,
-    credentials = "omit"
-  ): Promise<Record<string, any>> => {
+  fetchJson = async (url: string, json: string, credentials = "omit") => {
     const postData = {
       method: "POST",
       headers: {
@@ -42,10 +38,14 @@ export default class MisskeyUtils {
     const response = await fetch(url, postData);
     if (response.ok) {
       console.log(`${response.status} OK`);
-      return (await response.json()) as Record<string, any>;
+      if (response.status === 204) {
+        return;
+      } else {
+        return response.json();
+      }
     } else {
       console.log(`${response.status} Error`);
-      return (await response.json()) as Record<string, any>;
+      return response.json();
     }
   };
 
@@ -189,7 +189,7 @@ export default class MisskeyUtils {
       "include"
     );
   };
-  reaction = (emoji: string, noteId: string): Promise<Record<string, any>> => {
+  reaction = (emoji: string, noteId: string) => {
     const createReactionJson = JSON.stringify({
       noteId: noteId,
       reaction: emoji,
