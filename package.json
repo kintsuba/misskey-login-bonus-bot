@@ -22,8 +22,9 @@
     "websocket": "^1.0.30"
   },
   "resolutions": {
-    "node-fetch": "~2.6.7",
+    "node-fetch": "^2.6.7",
     "node-forge": "^1.0.0",
-    "ansi-regex": "~5.0.1"
+    "ansi-regex": "^5.0.1",
+    "minimatch": "^3.0.5"
   }
 }
