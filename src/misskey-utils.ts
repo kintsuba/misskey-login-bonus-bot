@@ -67,7 +67,7 @@ export default class MisskeyUtils {
     localOnly?: boolean;
     poll?: Poll;
     visibleUserIds?: string[];
-  }): Promise<Record<string, any>> => {
+  }) => {
     const noteObj = {
       visibility: visibility,
       text: text,
@@ -94,45 +94,39 @@ export default class MisskeyUtils {
       "include"
     );
   };
-  noteHome = (text: string): Promise<Record<string, any>> => {
+  noteHome = (text: string) => {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Home,
     });
   };
-  noteFollowers = (text: string): Promise<Record<string, any>> => {
+  noteFollowers = (text: string) => {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Followers,
     });
   };
-  notePublic = (text: string): Promise<Record<string, any>> => {
+  notePublic = (text: string) => {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Public,
     });
   };
-  replyHome = (text: string, replyId: string): Promise<Record<string, any>> => {
+  replyHome = (text: string, replyId: string) => {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Home,
       replyId: replyId,
     });
   };
-  replyFollowers = (
-    text: string,
-    replyId: string
-  ): Promise<Record<string, any>> => {
+  replyFollowers = (text: string, replyId: string) => {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Followers,
       replyId: replyId,
     });
   };
-  replyPublic = (
-    text: string,
-    replyId: string
-  ): Promise<Record<string, any>> => {
+  replyPublic = (text: string, replyId: string) => {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Public,
@@ -143,7 +137,7 @@ export default class MisskeyUtils {
     text: string,
     replyId: string,
     visibleUserIds: string[]
-  ): Promise<Record<string, any>> => {
+  ) => {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Specified,
@@ -151,11 +145,7 @@ export default class MisskeyUtils {
       visibleUserIds: visibleUserIds,
     });
   };
-  replyHomeWithPoll = (
-    text: string,
-    replyId: string,
-    poll: Poll
-  ): Promise<Record<string, any>> => {
+  replyHomeWithPoll = (text: string, replyId: string, poll: Poll) => {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Home,
@@ -168,7 +158,7 @@ export default class MisskeyUtils {
     replyId: string,
     visibleUserIds: string[],
     poll: Poll
-  ): Promise<Record<string, any>> => {
+  ) => {
     return this.note({
       text: text,
       visibility: MisskeyUtils.Visibility.Specified,
@@ -177,7 +167,7 @@ export default class MisskeyUtils {
       poll: poll,
     });
   };
-  message = (text: string, userId: string): Promise<Record<string, any>> => {
+  message = (text: string, userId: string) => {
     const messageJson = JSON.stringify({
       userId: userId,
       text: text,
@@ -202,7 +192,7 @@ export default class MisskeyUtils {
     );
   };
 
-  follow = (userId: string): Promise<Record<string, any>> => {
+  follow = (userId: string) => {
     const followJson = JSON.stringify({
       userId: userId,
       i: this.token,
@@ -213,7 +203,7 @@ export default class MisskeyUtils {
       "include"
     );
   };
-  unfollow = (userId: string): Promise<Record<string, any>> => {
+  unfollow = (userId: string) => {
     const unfollowJson = JSON.stringify({
       userId: userId,
       i: this.token,

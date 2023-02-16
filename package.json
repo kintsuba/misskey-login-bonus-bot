@@ -17,8 +17,8 @@
     "firebase": "^9.17.1",
     "firebase-admin": "^11.5.0",
     "moment": "^2.29.4",
-    "node-fetch": "^2.6.7",
-    "node-schedule": "^2.1.0",
+    "node-fetch": "^2",
+    "node-schedule": "^2.1.1",
     "websocket": "^1.0.30"
   },
   "resolutions": {
