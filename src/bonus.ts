@@ -189,24 +189,16 @@ export default class Bonus {
   }
 
   public async resetLogin(): Promise<void> {
-    try {
-      await this.db.runTransaction(async (t) => {
-        const hosts = await this.db.collection("hosts").listDocuments();
-        for (const host of hosts) {
-          const users = await host.collection("users").listDocuments();
-          for (const user of users) {
-            const userDoc = await t.get(user);
-            const isLastLogin = userDoc.data()?.isLogin;
-            t.update(user, {
-              isLastLogin: isLastLogin,
-              isLogin: false,
-            });
-          }
-        }
-      });
-      console.log("Transaction success!");
-    } catch (e) {
-      console.log("Transaction failure:", e);
+    const hosts = await this.db.collection("hosts").listDocuments();
+    for (const host of hosts) {
+      const users = await host.collection("users").listDocuments();
+      for (const user of users) {
+        const userData = await user.get();
+        user.update({
+          isLastLogin: userData.data()?.isLogin,
+          isLogin: false,
+        });
+      }
     }
   }
 }
