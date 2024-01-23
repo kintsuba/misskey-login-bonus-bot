@@ -10,7 +10,7 @@ const removeNotFollowed = async (
   misskeyUtils: MisskeyUtils
 ): Promise<boolean> => {
   const checkFollowJson = JSON.stringify({
-    username: "cordreel"
+    username: "cordreel",
   });
   const response = misskeyUtils.fetchJson(
     "https://misskey.m544.net/api/users/following",
@@ -19,7 +19,7 @@ const removeNotFollowed = async (
   const followingData = await response;
   followingData.users.forEach(async (user: any) => {
     const checkFollowByIdJson = JSON.stringify({
-      userId: user.id
+      userId: user.id,
     });
     const response = misskeyUtils.fetchJson(
       "https://misskey.m544.net/api/users/following",
@@ -41,7 +41,12 @@ const removeNotFollowed = async (
 };
 
 const periodicallyJobs = (misskeyUtils: MisskeyUtils, bonus: Bonus): void => {
-  const fiveOclockJob = schedule.scheduleJob("00 05 * * *", () => {
+  const rule = new schedule.RecurrenceRule();
+  rule.hour = 5;
+  rule.minute = 0;
+  rule.tz = "Asia/Tokyo";
+
+  const fiveOclockJob = schedule.scheduleJob(rule, () => {
     bonus.resetLogin();
     removeNotFollowed(misskeyUtils);
     misskeyUtils.noteHome(
