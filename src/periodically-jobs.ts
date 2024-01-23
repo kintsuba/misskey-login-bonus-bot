@@ -50,9 +50,9 @@ const periodicallyJobs = (misskeyUtils: MisskeyUtils, bonus: Bonus): void => {
     bonus.resetLogin();
     removeNotFollowed(misskeyUtils);
     misskeyUtils.noteHome(
-      `5時になったので、**${moment().format(
-        "M月D日"
-      )}**のログインボーナスが受け取れるようになりました。`
+      `5時になったので、**${moment()
+        .add(9, "h")
+        .format("M月D日")}**のログインボーナスが受け取れるようになりました。`
     );
   });
 };
