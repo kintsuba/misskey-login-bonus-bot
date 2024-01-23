@@ -3,6 +3,7 @@
     "dev": "ts-node ./src/main.ts",
     "build": "tsc"
   },
+  "packageManager": "yarn@1.22.21",
   "devDependencies": {
     "@types/node-fetch": "^2.6.2",
     "@types/node-schedule": "^2.1.0",
