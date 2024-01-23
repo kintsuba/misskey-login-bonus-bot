@@ -141,6 +141,7 @@ export default class Bonus {
             ? admin.firestore.FieldValue.increment(1)
             : 1,
           totalLoginDays: admin.firestore.FieldValue.increment(1),
+          lastLoginDate: new Date(),
         });
         const doc = await userDocRef.get();
         const data = doc.data();
@@ -178,6 +179,7 @@ export default class Bonus {
         continuousloginDays: 1,
         totalLoginDays: 1,
         host: host,
+        lastLoginDate: new Date(),
       };
       await userDocRef.set(data);
       misskeyUtils.replySpecified(
