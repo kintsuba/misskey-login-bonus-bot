@@ -1,10 +1,21 @@
 import MisskeyUtils from "./misskey-utils";
 import experienceTable from "./experience-table";
-import * as firebase from "firebase/app";
-import "firebase/firestore";
-import admin from "firebase-admin";
+import { initializeApp } from "firebase/app";
+import {
+  getFirestore,
+  collectionGroup,
+  getDocs,
+  Firestore,
+  query,
+  where,
+  or,
+  doc,
+  getDoc,
+  setDoc,
+  increment,
+  updateDoc,
+} from "firebase/firestore/lite";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import * as serviceAccount from "../key/misskey-login-bonus-c1453cb75c30.json";
 
 interface User {
   id: string;
@@ -73,25 +84,20 @@ const experienceToLevel = (
 };
 
 export default class Bonus {
-  private db: FirebaseFirestore.Firestore;
+  private db: Firestore;
 
   constructor() {
     const firebaseConfig = {
-      apiKey: "AIzaSyDYyN8Tl4vSpil1r1xdlTqVEDoaxzBrMMY",
-      authDomain: "misskey-login-bonus.firebaseapp.com",
-      databaseURL: "https://misskey-login-bonus.firebaseio.com",
-      projectId: "misskey-login-bonus",
-      storageBucket: "misskey-login-bonus.appspot.com",
-      messagingSenderId: "1046728037357",
-      appId: "1:1046728037357:web:81576eae5e5fc01715cde4",
+      apiKey: process.env.FIREBASE_API_KEY,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+      databaseURL: process.env.FIREBASE_DATABASE_URL,
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+      appId: process.env.FIREBASE_APP_ID,
     };
-    firebase.initializeApp(firebaseConfig);
-
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as unknown as string),
-    });
-
-    this.db = admin.firestore();
+    const app = initializeApp(firebaseConfig);
+    this.db = getFirestore(app);
   }
 
   public async update(
@@ -102,28 +108,19 @@ export default class Bonus {
     const fortune = getTodayFortune();
 
     const host = user.host ?? "misskey.m544.net";
-    const userDocRef = await this.db
-      .collection("hosts")
-      .doc(host)
-      .collection("users")
-      .doc(user.id);
-    const userDoc = await userDocRef.get();
-    if (userDoc.exists) {
+    const userRef = doc(this.db, "hosts", host, "users", user.id);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+
       // 存在するなら更新処理
-      if (userDoc.data()?.isLogin) {
+      if (userData.isLogin) {
         // ログインしていたら
         misskeyUtils.reaction("❎", id);
 
         misskeyUtils.replySpecified(
-          `本日は既にログイン済みです。\n現在のレベル: **${
-            userDoc.data()?.level
-          }**\n次のレベルまで: **${
-            userDoc.data()?.experienceNextLevelNeed
-          }ポイント**\n連続ログイン: **${
-            userDoc.data()?.continuousloginDays
-          }日**\n合計ログイン: **${
-            userDoc.data()?.totalLoginDays
-          }日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
+          `本日は既にログイン済みです。\n現在のレベル: **${userData.level}**\n次のレベルまで: **${userData.experienceNextLevelNeed}ポイント**\n連続ログイン: **${userData.continuousloginDays}日**\n合計ログイン: **${userData.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
           id,
           [user.id]
         );
@@ -131,24 +128,22 @@ export default class Bonus {
         // ログインしていなかったら
         misskeyUtils.reaction("⭕", id);
 
-        await userDocRef.update({
-          experience: admin.firestore.FieldValue.increment(fortune.experience),
+        await updateDoc(userRef, {
+          experience: increment(fortune.experience),
           avatarUrl: user.avatarUrl,
           username: user.username,
           name: user.name,
           isLogin: true,
-          continuousloginDays: userDoc.data()?.isLastLogin
-            ? admin.firestore.FieldValue.increment(1)
-            : 1,
-          totalLoginDays: admin.firestore.FieldValue.increment(1),
+          continuousloginDays: userDoc.data()?.isLastLogin ? increment(1) : 1,
+          totalLoginDays: increment(1),
           lastLoginDate: new Date(),
         });
-        const doc = await userDocRef.get();
+        const doc = await getDoc(userRef);
         const data = doc.data();
         const { level, experienceNextLevelNeed } = experienceToLevel(
           data?.experience
         );
-        await userDocRef.update({
+        await updateDoc(userRef, {
           level: level,
           experienceNextLevelNeed: experienceNextLevelNeed,
         });
@@ -181,7 +176,7 @@ export default class Bonus {
         host: host,
         lastLoginDate: new Date(),
       };
-      await userDocRef.set(data);
+      await setDoc(userRef, data);
       misskeyUtils.replySpecified(
         `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
         id,
@@ -191,16 +186,17 @@ export default class Bonus {
   }
 
   public async resetLogin(): Promise<void> {
-    const hosts = await this.db.collection("hosts").listDocuments();
-    for (const host of hosts) {
-      const users = await host.collection("users").listDocuments();
-      for (const user of users) {
-        const userData = await user.get();
-        user.update({
-          isLastLogin: userData.data()?.isLogin,
-          isLogin: false,
-        });
-      }
-    }
+    const usersQuery = query(
+      collectionGroup(this.db, "users"),
+      or(where("isLogin", "==", true), where("isLastLogin", "==", true))
+    );
+    const usersQuerySnap = await getDocs(usersQuery);
+
+    usersQuerySnap.forEach(async (doc) => {
+      await updateDoc(doc.ref, {
+        isLastLogin: doc.data()?.isLogin,
+        isLogin: false,
+      });
+    });
   }
 }
