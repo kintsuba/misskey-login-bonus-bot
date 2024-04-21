@@ -1,6 +1,6 @@
 import MisskeyUtils from "./misskey-utils";
 import experienceTable from "./experience-table";
-import { FieldValue, Firestore } from "firebase-admin/firestore";
+import { FieldValue, Filter, Firestore } from "firebase-admin/firestore";
 import { applicationDefault, initializeApp } from "firebase-admin/app";
 
 interface User {
@@ -78,7 +78,6 @@ export default class Bonus {
     });
 
     this.db = new Firestore();
-    console.log(this.db);
   }
 
   public async update(
@@ -171,8 +170,12 @@ export default class Bonus {
   public async resetLogin(): Promise<void> {
     const usersQuery = this.db
       .collectionGroup("users")
-      .where("isLogin", "==", true)
-      .where("isLastLogin", "==", true);
+      .where(
+        Filter.or(
+          Filter.where("isLogin", "==", true),
+          Filter.where("isLastLogin", "==", true)
+        )
+      );
     const usersQuerySnap = await usersQuery.get();
 
     usersQuerySnap.forEach(async (doc) => {
