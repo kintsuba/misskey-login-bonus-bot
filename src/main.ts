@@ -21,10 +21,6 @@ const client = new WebSocket.client();
 
 client.on("connectFailed", (error) => {
   console.log("Connect Error: " + error.toString());
-  setTimeout(
-    () => client.connect("wss://misskey.m544.net/streaming?i=" + token),
-    6000
-  );
 });
 
 client.on("connect", (connection) => {
@@ -38,14 +34,11 @@ client.on("connect", (connection) => {
 
   connection.on("error", (error) => {
     console.log("Connection Error: " + error.toString());
-    connection.close();
+    connection.close(-1, error.toString());
   });
-  connection.on("close", () => {
-    console.log("WebSocket Client Closed");
-    setTimeout(
-      () => client.connect("wss://misskey.m544.net/streaming?i=" + token),
-      6000
-    );
+  connection.on("close", (reasonCode, description) => {
+    console.log("WebSocket Client Closed. Reason: " + description);
+    process.exit(reasonCode);
   });
   connection.on("message", (message) => {
     if (!message || message.type !== "utf8") return;
