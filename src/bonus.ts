@@ -1,21 +1,7 @@
 import MisskeyUtils from "./misskey-utils";
 import experienceTable from "./experience-table";
-import { initializeApp } from "firebase/app";
-import {
-  getFirestore,
-  collectionGroup,
-  getDocs,
-  Firestore,
-  query,
-  where,
-  or,
-  doc,
-  getDoc,
-  setDoc,
-  increment,
-  updateDoc,
-} from "firebase/firestore/lite";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+import { FieldValue, Firestore } from "firebase-admin/firestore";
+import { applicationDefault, initializeApp } from "firebase-admin/app";
 
 interface User {
   id: string;
@@ -87,17 +73,12 @@ export default class Bonus {
   private db: Firestore;
 
   constructor() {
-    const firebaseConfig = {
-      apiKey: process.env.FIREBASE_API_KEY,
-      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-      databaseURL: process.env.FIREBASE_DATABASE_URL,
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-      appId: process.env.FIREBASE_APP_ID,
-    };
-    const app = initializeApp(firebaseConfig);
-    this.db = getFirestore(app);
+    initializeApp({
+      credential: applicationDefault(),
+    });
+
+    this.db = new Firestore();
+    console.log(this.db);
   }
 
   public async update(
@@ -108,14 +89,14 @@ export default class Bonus {
     const fortune = getTodayFortune();
 
     const host = user.host ?? "misskey.m544.net";
-    const userRef = doc(this.db, "hosts", host, "users", user.id);
-    const userDoc = await getDoc(userRef);
+    const userRef = this.db.doc(`hosts/${host}/users/${user.id}`);
+    const userDoc = await userRef.get();
 
-    if (userDoc.exists()) {
+    if (userDoc.exists) {
       const userData = userDoc.data();
 
       // 存在するなら更新処理
-      if (userData.isLogin) {
+      if (userData?.isLogin) {
         // ログインしていたら
         misskeyUtils.reaction("❎", id);
 
@@ -128,22 +109,24 @@ export default class Bonus {
         // ログインしていなかったら
         misskeyUtils.reaction("⭕", id);
 
-        await updateDoc(userRef, {
-          experience: increment(fortune.experience),
+        await userRef.update({
+          experience: FieldValue.increment(fortune.experience),
           avatarUrl: user.avatarUrl,
           username: user.username,
           name: user.name,
           isLogin: true,
-          continuousloginDays: userDoc.data()?.isLastLogin ? increment(1) : 1,
-          totalLoginDays: increment(1),
+          continuousloginDays: userDoc.data()?.isLastLogin
+            ? FieldValue.increment(1)
+            : 1,
+          totalLoginDays: FieldValue.increment(1),
           lastLoginDate: new Date(),
         });
-        const doc = await getDoc(userRef);
+        const doc = await userRef.get();
         const data = doc.data();
         const { level, experienceNextLevelNeed } = experienceToLevel(
           data?.experience
         );
-        await updateDoc(userRef, {
+        await userRef.update({
           level: level,
           experienceNextLevelNeed: experienceNextLevelNeed,
         });
@@ -176,7 +159,7 @@ export default class Bonus {
         host: host,
         lastLoginDate: new Date(),
       };
-      await setDoc(userRef, data);
+      await userRef.set(data);
       misskeyUtils.replySpecified(
         `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
         id,
@@ -186,14 +169,14 @@ export default class Bonus {
   }
 
   public async resetLogin(): Promise<void> {
-    const usersQuery = query(
-      collectionGroup(this.db, "users"),
-      or(where("isLogin", "==", true), where("isLastLogin", "==", true))
-    );
-    const usersQuerySnap = await getDocs(usersQuery);
+    const usersQuery = this.db
+      .collectionGroup("users")
+      .where("isLogin", "==", true)
+      .where("isLastLogin", "==", true);
+    const usersQuerySnap = await usersQuery.get();
 
     usersQuerySnap.forEach(async (doc) => {
-      await updateDoc(doc.ref, {
+      await doc.ref.update({
         isLastLogin: doc.data()?.isLogin,
         isLogin: false,
       });
