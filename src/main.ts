@@ -55,6 +55,13 @@ client.on("connect", (connection) => {
       ) {
         if (data.body.body.userId === botId) return; // 自分自身は弾く
         bonus.update(data.body.body.id, data.body.body.user, misskeyUtils);
+      } else if (/\d{6}/.test(data.body.body.text)) {
+        bonus.unlock(
+          data.body.body.id,
+          data.body.body.user,
+          data.body.body.text,
+          misskeyUtils
+        );
       }
     }
   });

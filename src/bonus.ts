@@ -80,6 +80,10 @@ export default class Bonus {
     this.db = new Firestore();
   }
 
+  public createUnlockCode(): string {
+    return Math.floor(Math.random() * (999999 - 100000) + 100000).toString();
+  }
+
   public async update(
     id: string,
     user: User,
@@ -106,35 +110,51 @@ export default class Bonus {
         );
       } else {
         // ログインしていなかったら
-        misskeyUtils.reaction("⭕", id);
 
-        await userRef.update({
-          experience: FieldValue.increment(fortune.experience),
-          avatarUrl: user.avatarUrl,
-          username: user.username,
-          name: user.name,
-          isLogin: true,
-          continuousloginDays: userDoc.data()?.isLastLogin
-            ? FieldValue.increment(1)
-            : 1,
-          totalLoginDays: FieldValue.increment(1),
-          lastLoginDate: new Date(),
-        });
-        const doc = await userRef.get();
-        const data = doc.data();
-        const { level, experienceNextLevelNeed } = experienceToLevel(
-          data?.experience
-        );
-        await userRef.update({
-          level: level,
-          experienceNextLevelNeed: experienceNextLevelNeed,
-        });
+        // ロックされているか確認する
+        if (userData?.isLocked !== undefined && userData?.isLocked) {
+          // されていたらロックを解除する方法を教える
 
-        misskeyUtils.replySpecified(
-          `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
-          id,
-          [user.id]
-        );
+          const code = this.createUnlockCode();
+          await userRef.update({ unlockCode: code });
+
+          misskeyUtils.replySpecified(
+            `自動化対策のため、あなたのアカウントはロックされています。\n以下の6文字のコードをメンション付きでこのアカウント宛に送信してください。\n\nコード: **${code}**`,
+            id,
+            [user.id]
+          );
+        } else {
+          // ロックされていなかったら
+          misskeyUtils.reaction("⭕", id);
+
+          await userRef.update({
+            experience: FieldValue.increment(fortune.experience),
+            avatarUrl: user.avatarUrl,
+            username: user.username,
+            name: user.name,
+            isLogin: true,
+            continuousloginDays: userDoc.data()?.isLastLogin
+              ? FieldValue.increment(1)
+              : 1,
+            totalLoginDays: FieldValue.increment(1),
+            lastLoginDate: new Date(),
+          });
+          const doc = await userRef.get();
+          const data = doc.data();
+          const { level, experienceNextLevelNeed } = experienceToLevel(
+            data?.experience
+          );
+          await userRef.update({
+            level: level,
+            experienceNextLevelNeed: experienceNextLevelNeed,
+          });
+
+          misskeyUtils.replySpecified(
+            `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
+            id,
+            [user.id]
+          );
+        }
       }
     } else {
       // 存在しないなら作成処理
@@ -164,6 +184,32 @@ export default class Bonus {
         id,
         [user.id]
       );
+    }
+  }
+
+  public async unlock(
+    id: string,
+    user: User,
+    note: string,
+    misskeyUtils: MisskeyUtils
+  ): Promise<void> {
+    const execResult = /\d{6}/.exec(note);
+    if (!execResult) return;
+
+    const inputCode = execResult[0];
+
+    const host = user.host ?? "misskey.m544.net";
+    const userRef = this.db.doc(`hosts/${host}/users/${user.id}`);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) return;
+
+    const userData = userDoc.data();
+
+    if (userData?.isLocked && userData?.unlockCode == inputCode) {
+      await userRef.update({ isLocked: false });
+
+      misskeyUtils.replySpecified(`**ロックを解除しました！**`, id, [user.id]);
     }
   }
 
