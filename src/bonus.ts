@@ -125,35 +125,53 @@ export default class Bonus {
           );
         } else {
           // ロックされていなかったら
-          misskeyUtils.reaction("⭕", id);
+          const now = new Date();
+          const lastLoginDate = userData?.lastLoginDate.toDate();
+          const elapsedTime =
+            now.getTime() - lastLoginDate.getTime() - 86400000;
 
-          await userRef.update({
-            experience: FieldValue.increment(fortune.experience),
-            avatarUrl: user.avatarUrl,
-            username: user.username,
-            name: user.name,
-            isLogin: true,
-            continuousloginDays: userDoc.data()?.isLastLogin
-              ? FieldValue.increment(1)
-              : 1,
-            totalLoginDays: FieldValue.increment(1),
-            lastLoginDate: new Date(),
-          });
-          const doc = await userRef.get();
-          const data = doc.data();
-          const { level, experienceNextLevelNeed } = experienceToLevel(
-            data?.experience
-          );
-          await userRef.update({
-            level: level,
-            experienceNextLevelNeed: experienceNextLevelNeed,
-          });
+          if (elapsedTime >= -5000 && elapsedTime <= 5000) {
+            // 前回のログイン日時から±5秒以内の場合、自動化を疑ってロックする
+            const code = this.createUnlockCode();
+            await userRef.update({ isLocked: true, unlockCode: code });
 
-          misskeyUtils.replySpecified(
-            `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
-            id,
-            [user.id]
-          );
+            misskeyUtils.replySpecified(
+              `自動化対策のため、あなたのアカウントはロックされています。\n以下の6文字のコードをメンション付きでこのアカウント宛に送信してください。\n\nコード: **${code}**`,
+              id,
+              [user.id]
+            );
+          } else {
+            // 通常のログイン処理
+            misskeyUtils.reaction("⭕", id);
+
+            await userRef.update({
+              experience: FieldValue.increment(fortune.experience),
+              avatarUrl: user.avatarUrl,
+              username: user.username,
+              name: user.name,
+              isLogin: true,
+              continuousloginDays: userDoc.data()?.isLastLogin
+                ? FieldValue.increment(1)
+                : 1,
+              totalLoginDays: FieldValue.increment(1),
+              lastLoginDate: now,
+            });
+            const doc = await userRef.get();
+            const data = doc.data();
+            const { level, experienceNextLevelNeed } = experienceToLevel(
+              data?.experience
+            );
+            await userRef.update({
+              level: level,
+              experienceNextLevelNeed: experienceNextLevelNeed,
+            });
+
+            misskeyUtils.replySpecified(
+              `${fortune.message}\n現在のレベル: **${level}**\n次のレベルまで: **${experienceNextLevelNeed}ポイント**\n連続ログイン: **${data?.continuousloginDays}日**\n合計ログイン: **${data?.totalLoginDays}日**\n他の人のレベルを見る場合は?[こちら](https://misskey-loginbonus.info)`,
+              id,
+              [user.id]
+            );
+          }
         }
       }
     } else {
