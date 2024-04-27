@@ -227,7 +227,11 @@ export default class Bonus {
     if (userData?.isLocked && userData?.unlockCode == inputCode) {
       await userRef.update({ isLocked: false });
 
-      misskeyUtils.replySpecified(`**ロックを解除しました！**`, id, [user.id]);
+      misskeyUtils.replySpecified(
+        `**ロックを解除しました！**\nログインボーナスを取得する場合は改めて「ログボ」と送信してください。`,
+        id,
+        [user.id]
+      );
     }
   }
 
