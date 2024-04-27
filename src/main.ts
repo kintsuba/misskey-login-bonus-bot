@@ -48,6 +48,16 @@ client.on("connect", (connection) => {
       misskeyUtils.follow(data.body.body.id);
     } else if (data.body.id === "forhybridtl" && data.body.type == "note") {
       console.debug(data);
+
+      if (/\d{6}/.test(data.body.body.text)) {
+        bonus.unlock(
+          data.body.body.id,
+          data.body.body.user,
+          data.body.body.text,
+          misskeyUtils
+        );
+      }
+
       if (
         /ログインボーナス|ログボ|ろぐいんぼーなす|ろぐぼ/.test(
           data.body.body.text
@@ -55,13 +65,6 @@ client.on("connect", (connection) => {
       ) {
         if (data.body.body.userId === botId) return; // 自分自身は弾く
         bonus.update(data.body.body.id, data.body.body.user, misskeyUtils);
-      } else if (/\d{6}/.test(data.body.body.text)) {
-        bonus.unlock(
-          data.body.body.id,
-          data.body.body.user,
-          data.body.body.text,
-          misskeyUtils
-        );
       }
     }
   });
