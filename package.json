@@ -8,24 +8,27 @@
     "@types/node-fetch": "^2.6.2",
     "@types/node-schedule": "^2.1.7",
     "@types/websocket": "^1.0.5",
-    "prettier": "3.2.5",
+    "prettier": "3.3.2",
     "ts-node": "10.9.2",
     "typescript": "5.4.5"
   },
   "dependencies": {
     "@types/dotenv": "^8.2.0",
     "dotenv": "^16.4.5",
-    "firebase": "^10.11.0",
-    "firebase-admin": "^12.1.0",
+    "firebase": "^10.12.2",
+    "firebase-admin": "^12.1.1",
     "moment": "^2.29.4",
     "node-fetch": "^2",
     "node-schedule": "^2.1.1",
-    "websocket": "^1.0.30"
+    "websocket": "^1.0.35"
   },
   "resolutions": {
     "node-fetch": "^2.6.7",
     "node-forge": "^1.0.0",
     "ansi-regex": "^5.0.1",
-    "minimatch": "^3.0.5"
+    "minimatch": "^3.0.5",
+    "es5-ext": "^0.10.63",
+    "jose": "^4.15.5",
+    "@grpc/grpc-js": "^1.9.15"
   }
 }
