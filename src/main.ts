@@ -1,7 +1,6 @@
 import MisskeyUtils from "./misskey-utils";
 import * as WebSocket from "websocket";
 import Bonus from "./bonus";
-import periodicallyJobs from "./periodically-jobs";
 
 require("dotenv").config();
 
@@ -15,7 +14,6 @@ const instance = "misskey.m544.net";
 const botId = "5e2129e264d25837f5c87b6c";
 
 const bonus = new Bonus();
-let isRunOnceFunction = false;
 
 const client = new WebSocket.client();
 
@@ -27,10 +25,6 @@ client.on("connect", (connection) => {
   console.log("WebSocket Client Connected");
 
   const misskeyUtils = new MisskeyUtils(token, connection);
-  if (!isRunOnceFunction) {
-    periodicallyJobs(misskeyUtils, bonus);
-    isRunOnceFunction = true;
-  }
 
   connection.on("error", (error) => {
     console.log("Connection Error: " + error.toString());
