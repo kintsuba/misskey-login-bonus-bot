@@ -15,8 +15,8 @@
   "dependencies": {
     "@types/dotenv": "^8.2.0",
     "dotenv": "^16.4.5",
-    "firebase": "^10.12.2",
-    "firebase-admin": "^12.1.1",
+    "firebase": "^10.13.1",
+    "firebase-admin": "^12.4.0",
     "moment": "^2.29.4",
     "node-fetch": "^2",
     "node-schedule": "^2.1.1",
