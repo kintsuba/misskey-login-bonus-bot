@@ -126,20 +126,24 @@ export default class Bonus {
         } else {
           // ロックされていなかったら
           const now = new Date();
-          const lastLoginDate = userData?.lastLoginDate.toDate();
-          const elapsedTime =
-            now.getTime() - lastLoginDate.getTime() - 86400000;
 
-          if (elapsedTime >= -5000 && elapsedTime <= 5000) {
-            // 前回のログイン日時から±5秒以内の場合、自動化を疑ってロックする
-            const code = this.createUnlockCode();
-            await userRef.update({ isLocked: true, unlockCode: code });
+          if (userData?.lastLoginDate) {
+            // 最後にログインした日時が取得できる場合
+            const lastLoginDate = userData?.lastLoginDate.toDate();
+            const elapsedTime =
+              now.getTime() - lastLoginDate.getTime() - 86400000;
 
-            misskeyUtils.replySpecified(
-              `自動化対策のため、あなたのアカウントはロックされています。\n以下の6文字のコードをメンション付きでこのアカウント宛に送信してください。\n\nコード: **${code}**`,
-              id,
-              [user.id]
-            );
+            if (elapsedTime >= -5000 && elapsedTime <= 5000) {
+              // 前回のログイン日時から±5秒以内の場合、自動化を疑ってロックする
+              const code = this.createUnlockCode();
+              await userRef.update({ isLocked: true, unlockCode: code });
+
+              misskeyUtils.replySpecified(
+                `自動化対策のため、あなたのアカウントはロックされています。\n以下の6文字のコードをメンション付きでこのアカウント宛に送信してください。\n\nコード: **${code}**`,
+                id,
+                [user.id]
+              );
+            }
           } else {
             // 通常のログイン処理
             misskeyUtils.reaction("⭕", id);
