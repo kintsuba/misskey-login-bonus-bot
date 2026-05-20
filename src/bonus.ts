@@ -249,11 +249,13 @@ export default class Bonus {
       );
     const usersQuerySnap = await usersQuery.get();
 
-    usersQuerySnap.forEach(async (doc) => {
-      await doc.ref.update({
-        isLastLogin: doc.data()?.isLogin,
-        isLogin: false,
-      });
-    });
+    await Promise.all(
+      usersQuerySnap.docs.map((doc) =>
+        doc.ref.update({
+          isLastLogin: doc.data()?.isLogin,
+          isLogin: false,
+        })
+      )
+    );
   }
 }
