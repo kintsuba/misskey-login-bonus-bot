@@ -15,6 +15,12 @@ enum Visibility {
   Specified = "specified",
   Private = "private",
 }
+
+const errorToString = (error: unknown): string => {
+  if (error instanceof Error) return error.stack ?? error.message;
+  return String(error);
+};
+
 export default class MisskeyUtils {
   static readonly Visibility = Visibility;
   private token: string;
@@ -35,17 +41,38 @@ export default class MisskeyUtils {
       body: json,
     };
 
-    const response = await fetch(url, postData);
-    if (response.ok) {
-      console.log(`${response.status} OK`);
+    try {
+      const response = await fetch(url, postData);
       if (response.status === 204) {
+        console.log(`${response.status} OK`);
         return;
-      } else {
-        return response.json();
       }
-    } else {
-      console.log(`${response.status} Error`);
-      return response.json();
+
+      const body = await response.text();
+      const bodyPreview = body.slice(0, 500);
+      if (response.ok) {
+        console.log(`${response.status} OK`);
+      } else {
+        console.log(`${response.status} Error: ${bodyPreview}`);
+      }
+
+      if (!body) return;
+
+      try {
+        return JSON.parse(body);
+      } catch (error) {
+        console.log(
+          `Failed to parse Misskey API response from ${url}: ${errorToString(
+            error
+          )}. Body: ${bodyPreview}`
+        );
+        return;
+      }
+    } catch (error) {
+      console.log(
+        `Failed to call Misskey API ${url}: ${errorToString(error)}`
+      );
+      return;
     }
   };
 
