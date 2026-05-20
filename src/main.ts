@@ -21,6 +21,11 @@ const maxReconnectDelay = 60000;
 let reconnectDelay = 1000;
 let reconnectTimer: NodeJS.Timeout | undefined;
 
+const errorToString = (error: unknown): string => {
+  if (error instanceof Error) return error.stack ?? error.message;
+  return String(error);
+};
+
 const scheduleReconnect = (reason: string) => {
   if (reconnectTimer) return;
 
@@ -54,32 +59,42 @@ client.on("connect", (connection) => {
     );
     scheduleReconnect(description || reasonCode.toString());
   });
-  connection.on("message", (message) => {
-    if (!message || message.type !== "utf8") return;
-    const data = JSON.parse(message.utf8Data);
+  connection.on("message", async (message) => {
+    try {
+      if (!message || message.type !== "utf8") return;
+      const data = JSON.parse(message.utf8Data);
 
-    if (data.body.id === "formain" && data.body.type === "followed") {
-      misskeyUtils.follow(data.body.body.id);
-    } else if (data.body.id === "forhybridtl" && data.body.type == "note") {
-      console.debug(data);
+      if (data.body.id === "formain" && data.body.type === "followed") {
+        await misskeyUtils.follow(data.body.body.id);
+      } else if (data.body.id === "forhybridtl" && data.body.type == "note") {
+        console.debug(data);
 
-      if (/\d{6}/.test(data.body.body.text)) {
-        bonus.unlock(
-          data.body.body.id,
-          data.body.body.user,
-          data.body.body.text,
-          misskeyUtils
-        );
+        if (/\d{6}/.test(data.body.body.text)) {
+          await bonus.unlock(
+            data.body.body.id,
+            data.body.body.user,
+            data.body.body.text,
+            misskeyUtils
+          );
+        }
+
+        if (
+          /ログインボーナス|ログボ|ろぐいんぼーなす|ろぐぼ/.test(
+            data.body.body.text
+          )
+        ) {
+          if (data.body.body.userId === botId) return; // 自分自身は弾く
+          await bonus.update(
+            data.body.body.id,
+            data.body.body.user,
+            misskeyUtils
+          );
+        }
       }
-
-      if (
-        /ログインボーナス|ログボ|ろぐいんぼーなす|ろぐぼ/.test(
-          data.body.body.text
-        )
-      ) {
-        if (data.body.body.userId === botId) return; // 自分自身は弾く
-        bonus.update(data.body.body.id, data.body.body.user, misskeyUtils);
-      }
+    } catch (error) {
+      console.log(
+        `Failed to handle streaming message: ${errorToString(error)}`
+      );
     }
   });
 
